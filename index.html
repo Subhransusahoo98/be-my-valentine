@@ -56,6 +56,27 @@
       transition: 0.1s;
       z-index: 50;
     }
+
+    /* Video Player Style (Hidden initially) */
+    #spaceshipVideo {
+        display: none;
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: 100;
+        object-fit: cover;
+    }
+
+    /* Final Message Container (Hidden initially) */
+    #successContainer {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        z-index: 101; /* Above the video */
+        text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +84,10 @@
   <audio id="bgMusic" loop>
     <source src="https://github.com/sound-effects-library/romantic-music/raw/main/romantic-piano.mp3" type="audio/mpeg">
   </audio>
+
+  <video id="spaceshipVideo">
+    <source src="./spaceship.mp4" type="video/mp4">
+  </video>
 
   <div id="mainContainer" class="flex flex-col items-center p-4 text-center z-10">
     <img id="imageDisplay" src="./images/image1.gif" alt="Cute bear" class="rounded-md h-[300px] object-cover mb-4" />
@@ -86,6 +111,12 @@
         No
       </button>
     </div>
+  </div>
+
+  <div id="successContainer">
+    <img src="./images/image7.gif" alt="Celebration" class="mx-auto h-[300px] rounded-md mb-4"/>
+    <div class="text-5xl font-bold text-pink-500">Congrats, you scored a baddie! 🥵</div>
+    <div class="text-2xl mt-4 font-bold text-white">You're cordially invited to be dicked down 🍆</div>
   </div>
 
   <script>
@@ -112,10 +143,11 @@
 
     const yesButton = document.getElementById('yesButton');
     const noButton = document.getElementById('noButton');
-    const imageDisplay = document.getElementById('imageDisplay');
-    const valentineQuestion = document.getElementById('valentineQuestion');
+    const mainContainer = document.getElementById('mainContainer');
+    const successContainer = document.getElementById('successContainer');
+    const videoElement = document.getElementById('spaceshipVideo');
 
-    // 1. Music
+    // 1. Music Starter
     document.body.addEventListener('click', function() {
       const audio = document.getElementById("bgMusic");
       audio.play().catch(e => console.log("Audio play failed"));
@@ -135,27 +167,38 @@
     noButton.addEventListener("mouseover", moveButton);
     noButton.addEventListener("click", moveButton);
 
-    // 3. Success Logic (UPDATED TEXT HERE)
+    // 3. Success Logic (Video Transition)
     yesButton.addEventListener("click", () => {
-      document.getElementById('yesButton').style.display = 'none';
-      document.getElementById('noButton').style.display = 'none';
-      imageDisplay.style.display = 'none';
+      // Step A: Hide the question
+      mainContainer.style.display = 'none';
       document.querySelector('p').style.display = 'none';
 
-      // --- CUSTOM MESSAGE UPDATE ---
-      valentineQuestion.innerHTML = `
-        <img src="./images/image7.gif" alt="Celebration" class="mx-auto h-[300px] rounded-md mb-4"/>
-        <div class="text-4xl font-bold text-pink-500">Congrats, you scored a baddie! 🥵</div>
-        <div class="text-2xl mt-4 font-bold text-white">You're cordially invited to be dicked down 🍆</div>
-      `;
+      // Step B: Show and Play the Video
+      videoElement.style.display = 'block';
+      videoElement.play();
 
-      confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ['#ff69b4', '#ffffff', '#00c3ff']
-      });
+      // Step C: When video finishes...
+      videoElement.onended = function() {
+        // Hide video (or you can keep it as background by deleting the line below)
+        videoElement.style.display = 'none'; 
+        
+        // Show Success Message
+        successContainer.style.display = 'flex';
+        
+        // Trigger Effects
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ['#ff69b4', '#ffffff', '#00c3ff']
+        });
+        
+        startBouncingImage();
+      };
+    });
 
+    // Bouncing Image Logic
+    function startBouncingImage() {
       const bounceImage = document.createElement("img");
       bounceImage.src = "./images/us.jpg"; 
       bounceImage.onerror = function() { this.style.display = 'none'; };
@@ -183,7 +226,7 @@
         requestAnimationFrame(animateBounce);
       }
       animateBounce();
-    });
+    }
   </script>
 </body>
 </html>

@@ -94,7 +94,7 @@
 </head>
 <body>
   
-  <audio id="bgMusic" loop autoplay>
+  <audio id="bgMusic" loop>
     <source src="https://ia800504.us.archive.org/11/items/HaloThemeSongOriginal/Halo%20Theme%20Song%20Original.mp3" type="audio/mpeg">
   </audio>
 
@@ -136,31 +136,51 @@
   </div>
 
   <script>
-    // --- 1. AGGRESSIVE AUDIO UNLOCKER ---
+    // --- 1. SMART AUDIO CONTROLLER ---
     const audio = document.getElementById("bgMusic");
     
+    // Logic to skip the first 4 seconds
+    audio.addEventListener('loadedmetadata', function() {
+        if(audio.currentTime < 4) audio.currentTime = 4;
+    });
+
     function unlockAudio() {
-        // If it's paused, play it
         if (audio.paused) {
+            // Force skip first 4 seconds immediately before playing
+            if(audio.currentTime < 4) {
+                audio.currentTime = 4;
+            }
+            
             audio.volume = 0.6; 
-            audio.play().then(() => {
-                // If successful, we can remove the listeners to save memory
-                document.removeEventListener('click', unlockAudio);
-                document.removeEventListener('touchstart', unlockAudio);
-                document.removeEventListener('scroll', unlockAudio);
-            }).catch(e => {
-                console.log("Auto-play blocked, waiting for touch...");
-            });
+            
+            // Try to play
+            var playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    console.log("Audio started!");
+                    // Remove listeners once successful
+                    document.removeEventListener('click', unlockAudio);
+                    document.removeEventListener('touchstart', unlockAudio);
+                    document.removeEventListener('scroll', unlockAudio);
+                    document.removeEventListener('keydown', unlockAudio);
+                    document.removeEventListener('mousemove', unlockAudio);
+                })
+                .catch(error => {
+                    console.log("Auto-play blocked. Waiting for interaction.");
+                });
+            }
         }
     }
 
-    // Attach to EVERY interaction type to catch the first movement
+    // LISTENER ARMY: Triggers on literally any movement
     document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio);
-    document.addEventListener('scroll', unlockAudio);
-    document.addEventListener('keydown', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio); // Phone touch
+    document.addEventListener('scroll', unlockAudio);     // Phone scroll
+    document.addEventListener('keydown', unlockAudio);    // Keyboard press
+    document.addEventListener('mousemove', unlockAudio);  // Mouse movement (PC)
     
-    // Try once immediately on load (works on some desktops)
+    // Try once immediately on load
     unlockAudio();
 
 
@@ -203,8 +223,7 @@
     const moveButton = function (e) {
       if(e && e.type === 'touchstart') e.preventDefault();
       
-      // Safety check: ensure music is playing if they try to hit No
-      unlockAudio();
+      unlockAudio(); // Ensure audio plays
 
       const maxWidth = window.innerWidth - noButton.offsetWidth - 40;
       const maxHeight = window.innerHeight - noButton.offsetHeight - 40;
@@ -223,13 +242,12 @@
 
     // --- 4. YES BUTTON LOGIC ---
     yesButton.addEventListener("click", () => {
-      // Safety check: ensure music is playing
-      unlockAudio();
+      unlockAudio(); // Ensure audio plays
 
       mainContainer.style.display = 'none';
       document.querySelector('p').style.display = 'none';
 
-      // Play Muted Video (Music continues playing from background)
+      // Play Muted Video
       videoElement.style.display = 'block';
       videoElement.play();
       

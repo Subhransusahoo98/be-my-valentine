@@ -42,9 +42,13 @@
   <div id="mainContainer" class="flex flex-col items-center p-4 text-center z-10">
     <img id="imageDisplay" src="./images/image1.gif" alt="Cute bear" class="rounded-md h-[300px] object-cover mb-4" />
     
-    <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] mb-8">
+    <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] mb-2">
       Will you be my Valentine, Clara? 🌹
     </h2>
+    
+    <p class="text-xl font-semibold text-gray-600 mb-6">
+      I dare you to say no 😏
+    </p>
     
     <div class="flex gap-4 items-center justify-center w-full relative h-20">
       <button id="yesButton"
@@ -66,7 +70,7 @@
     const valentineQuestion = document.getElementById('valentineQuestion');
     const mainContainer = document.getElementById('mainContainer');
 
-    // 1. Music Starter (Music starts on first interaction)
+    // 1. Music Starter
     document.body.addEventListener('click', function() {
       const audio = document.getElementById("bgMusic");
       audio.play().catch(error => console.log("Audio play failed usually because user didn't interact yet"));
@@ -74,61 +78,54 @@
 
     // 2. Instant Runaway Button Logic
     const moveButton = function () {
-      // Get the window boundaries (minus button size so it stays on screen)
       const maxWidth = window.innerWidth - noButton.offsetWidth - 20;
       const maxHeight = window.innerHeight - noButton.offsetHeight - 20;
 
-      // Calculate random position
       const x = Math.random() * maxWidth;
       const y = Math.random() * maxHeight;
 
-      // FIXED positioning makes it relative to the screen (solves the vanishing issue)
       noButton.style.position = "fixed"; 
       noButton.style.left = `${x}px`;
       noButton.style.top = `${y}px`;
     };
 
-    // Run on Hover (Desktop) and Click (Mobile)
     noButton.addEventListener("mouseover", moveButton);
     noButton.addEventListener("click", moveButton);
 
-    // 3. Success Logic (Sushi Date)
+    // 3. Success Logic
     yesButton.addEventListener("click", () => {
-      // Hide buttons and old image
       document.getElementById('yesButton').style.display = 'none';
       document.getElementById('noButton').style.display = 'none';
       imageDisplay.style.display = 'none';
+      
+      // Also hide the "Dare you" text when she clicks yes
+      document.querySelector('p').style.display = 'none';
 
-      // Update Text
       valentineQuestion.innerHTML = `
         <img src="./images/image7.gif" alt="Celebration" class="mx-auto h-[300px] rounded-md mb-4"/>
         <div class="text-5xl font-bold text-[#bd1e59]">Yay! I knew it! ❤️</div>
         <div class="text-2xl mt-4 font-bold text-gray-700">Pick you up at 8pm? 🍣🥂</div>
       `;
 
-      // Confetti Explosion
       confetti({
         particleCount: 150,
         spread: 100,
         origin: { y: 0.6 }
       });
 
-      // Bouncing Image Logic (Optional: Looks for us.jpg)
       const bounceImage = document.createElement("img");
       bounceImage.src = "./images/us.jpg"; 
-      // If us.jpg doesn't exist, this hides the broken image icon
       bounceImage.onerror = function() { this.style.display = 'none'; };
       
-      bounceImage.style.position = "fixed"; // Fixed ensures it bounces on whole screen
+      bounceImage.style.position = "fixed"; 
       bounceImage.style.width = "200px";
       bounceImage.style.height = "200px";
       bounceImage.style.borderRadius = "50%";
       bounceImage.style.border = "5px solid #bd1e59";
       bounceImage.style.objectFit = "cover";
-      bounceImage.style.zIndex = "-1"; // Put behind text
+      bounceImage.style.zIndex = "-1"; 
       document.body.appendChild(bounceImage);
 
-      // Simple animation for bouncing image
       let x = Math.random() * window.innerWidth;
       let y = Math.random() * window.innerHeight;
       let dx = 3; let dy = 3;

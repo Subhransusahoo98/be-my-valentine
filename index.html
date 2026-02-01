@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>For Clara 🌹</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
   <style>
     .gradient-background {
       background: linear-gradient(180deg, rgba(255, 208, 229, 1) 0%, rgba(255, 232, 242, 1) 36%, rgba(255, 255, 255, 1) 100%);
+      overflow: hidden; /* Prevents scrollbars when button moves */
     }
     
-    /* NEW ANIMATION: Heartbeat instead of Bounce */
     .heartbeat {
       animation: heartbeat 1.5s ease infinite;
     }
@@ -22,42 +25,120 @@
       42% { transform: scale(1.1); }
       70% { transform: scale(1); }
     }
+    
+    /* Make sure No button can move freely */
+    #noButton {
+      transition: 0.1s; /* Smooth start */
+    }
   </style>
 </head>
-<body class="gradient-background">
+<body class="gradient-background h-screen w-screen flex flex-col items-center justify-center relative">
   
   <audio id="bgMusic" loop>
     <source src="https://github.com/sound-effects-library/romantic-music/raw/main/romantic-piano.mp3" type="audio/mpeg">
   </audio>
 
-  <div class="flex items-center justify-center h-screen">
-    <div class="flex flex-col items-center p-4 text-center">
-      <img id="imageDisplay" src="./images/image1.gif" alt="Cute dancing duck with hearts" class="rounded-md h-[300px]" style="object-fit: cover;" />
-      
-      <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4 text-center">
-        Will you be my Valentine, Clara? 🌹
-      </h2>
-      
-      <div class="flex gap-4 pt-[20px] items-center" id="responseButtons">
-        <button id="yesButton"
-          class="heartbeat inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-green-400 min-h-12 min-w-[75px] px-4 py-2 bg-green-500 text-white transition">
-          Yes
-        </button>
-        <button id="noButton"
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-red-700 h-12 min-w-[75px] w-auto px-4 py-2 bg-red-500 text-white">
-          No
-        </button>
-      </div>
+  <div id="mainContainer" class="flex flex-col items-center p-4 text-center z-10">
+    <img id="imageDisplay" src="./images/image1.gif" alt="Cute bear" class="rounded-md h-[300px] object-cover mb-4" />
+    
+    <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] mb-8">
+      Will you be my Valentine, Clara? 🌹
+    </h2>
+    
+    <div class="flex gap-4 items-center justify-center w-full relative h-20">
+      <button id="yesButton"
+        class="heartbeat rounded-md text-[20px] font-medium hover:bg-green-400 bg-green-500 text-white px-8 py-4 transition shadow-lg">
+        Yes
+      </button>
+
+      <button id="noButton"
+        class="rounded-md text-[20px] font-medium bg-red-500 text-white px-8 py-4 shadow-lg hover:bg-red-700">
+        No
+      </button>
     </div>
   </div>
 
-  <script type="module" src="./script.js"></script>
-  
   <script>
+    const yesButton = document.getElementById('yesButton');
+    const noButton = document.getElementById('noButton');
+    const imageDisplay = document.getElementById('imageDisplay');
+    const valentineQuestion = document.getElementById('valentineQuestion');
+    const mainContainer = document.getElementById('mainContainer');
+
+    // 1. Music Starter (Music starts on first interaction)
     document.body.addEventListener('click', function() {
-      var audio = document.getElementById("bgMusic");
-      audio.play();
+      const audio = document.getElementById("bgMusic");
+      audio.play().catch(error => console.log("Audio play failed usually because user didn't interact yet"));
     }, { once: true });
+
+    // 2. Instant Runaway Button Logic
+    const moveButton = function () {
+      // Calculate random position
+      const x = Math.random() * (window.innerWidth - noButton.offsetWidth - 50);
+      const y = Math.random() * (window.innerHeight - noButton.offsetHeight - 50);
+
+      // Make it absolute so it breaks out of the layout
+      noButton.style.position = "absolute";
+      noButton.style.left = `${x}px`;
+      noButton.style.top = `${y}px`;
+    };
+
+    // Run on Hover (Desktop) and Click (Mobile)
+    noButton.addEventListener("mouseover", moveButton);
+    noButton.addEventListener("click", moveButton);
+
+    // 3. Success Logic (Sushi Date)
+    yesButton.addEventListener("click", () => {
+      // Hide buttons and old image
+      document.getElementById('yesButton').style.display = 'none';
+      document.getElementById('noButton').style.display = 'none';
+      imageDisplay.style.display = 'none';
+
+      // Update Text
+      valentineQuestion.innerHTML = `
+        <img src="./images/image7.gif" alt="Celebration" class="mx-auto h-[300px] rounded-md mb-4"/>
+        <div class="text-5xl font-bold text-[#bd1e59]">Yay! I knew it! ❤️</div>
+        <div class="text-2xl mt-4 font-bold text-gray-700">Pick you up at 8pm? 🍣🥂</div>
+      `;
+
+      // Confetti Explosion
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+
+      // Bouncing Image Logic (Optional: Looks for us.jpg)
+      const bounceImage = document.createElement("img");
+      bounceImage.src = "./images/us.jpg"; 
+      // If us.jpg doesn't exist, this hides the broken image icon
+      bounceImage.onerror = function() { this.style.display = 'none'; };
+      
+      bounceImage.style.position = "absolute";
+      bounceImage.style.width = "200px";
+      bounceImage.style.height = "200px";
+      bounceImage.style.borderRadius = "50%";
+      bounceImage.style.border = "5px solid #bd1e59";
+      bounceImage.style.objectFit = "cover";
+      bounceImage.style.zIndex = "-1"; // Put behind text
+      document.body.appendChild(bounceImage);
+
+      // Simple animation for bouncing image
+      let x = Math.random() * window.innerWidth;
+      let y = Math.random() * window.innerHeight;
+      let dx = 3; let dy = 3;
+
+      function animateBounce() {
+        if (x + 200 >= window.innerWidth || x <= 0) dx = -dx;
+        if (y + 200 >= window.innerHeight || y <= 0) dy = -dy;
+        x += dx;
+        y += dy;
+        bounceImage.style.left = x + "px";
+        bounceImage.style.top = y + "px";
+        requestAnimationFrame(animateBounce);
+      }
+      animateBounce();
+    });
   </script>
 </body>
 </html>

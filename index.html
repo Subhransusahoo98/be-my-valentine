@@ -26,9 +26,10 @@
       70% { transform: scale(1); }
     }
     
-    /* Make sure No button can move freely */
+    /* Make sure No button is always on top */
     #noButton {
       transition: 0.1s; /* Smooth start */
+      z-index: 50; /* Ensures it stays on top of images/text */
     }
   </style>
 </head>
@@ -73,12 +74,16 @@
 
     // 2. Instant Runaway Button Logic
     const moveButton = function () {
-      // Calculate random position
-      const x = Math.random() * (window.innerWidth - noButton.offsetWidth - 50);
-      const y = Math.random() * (window.innerHeight - noButton.offsetHeight - 50);
+      // Get the window boundaries (minus button size so it stays on screen)
+      const maxWidth = window.innerWidth - noButton.offsetWidth - 20;
+      const maxHeight = window.innerHeight - noButton.offsetHeight - 20;
 
-      // Make it absolute so it breaks out of the layout
-      noButton.style.position = "absolute";
+      // Calculate random position
+      const x = Math.random() * maxWidth;
+      const y = Math.random() * maxHeight;
+
+      // FIXED positioning makes it relative to the screen (solves the vanishing issue)
+      noButton.style.position = "fixed"; 
       noButton.style.left = `${x}px`;
       noButton.style.top = `${y}px`;
     };
@@ -114,7 +119,7 @@
       // If us.jpg doesn't exist, this hides the broken image icon
       bounceImage.onerror = function() { this.style.display = 'none'; };
       
-      bounceImage.style.position = "absolute";
+      bounceImage.style.position = "fixed"; // Fixed ensures it bounces on whole screen
       bounceImage.style.width = "200px";
       bounceImage.style.height = "200px";
       bounceImage.style.borderRadius = "50%";

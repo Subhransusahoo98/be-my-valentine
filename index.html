@@ -25,6 +25,22 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* Start Screen Overlay */
+    #startScreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000; /* Pure black to hide everything */
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.8s ease-out; /* Smooth fade out */
+    }
+
     /* Twinkling Star Styles */
     .star {
         position: absolute;
@@ -41,7 +57,6 @@
         100% { opacity: 0.3; transform: scale(1); }
     }
 
-    /* Hyperspace Animation */
     @keyframes hyperSpeed {
         0% { transform: translateY(0) scale(1); opacity: 1; }
         100% { transform: translateY(100vh) scale(2); opacity: 0; }
@@ -64,7 +79,6 @@
       touch-action: none; 
     }
 
-    /* Video Player - Muted & Transparent Background */
     #spaceshipVideo {
         display: none;
         position: fixed;
@@ -97,6 +111,12 @@
   <audio id="bgMusic" loop>
     <source src="https://ia800504.us.archive.org/11/items/HaloThemeSongOriginal/Halo%20Theme%20Song%20Original.mp3" type="audio/mpeg">
   </audio>
+
+  <div id="startScreen">
+    <button id="enterButton" class="text-2xl font-bold text-pink-500 border-2 border-pink-500 rounded-full px-8 py-4 hover:bg-pink-500 hover:text-white transition shadow-[0_0_15px_rgba(236,72,153,0.6)] heartbeat">
+      For Clara 🌹 (Tap to Open)
+    </button>
+  </div>
 
   <video id="spaceshipVideo" muted playsinline webkit-playsinline>
     <source src="./Spaceship.mp4" type="video/mp4">
@@ -136,53 +156,32 @@
   </div>
 
   <script>
-    // --- 1. SMART AUDIO CONTROLLER ---
+    // --- 1. ENTER BUTTON LOGIC ---
+    // This solves the audio problem 100% by forcing a click at the start
+    const startScreen = document.getElementById('startScreen');
+    const enterButton = document.getElementById('enterButton');
     const audio = document.getElementById("bgMusic");
-    
-    // Logic to skip the first 4 seconds
-    audio.addEventListener('loadedmetadata', function() {
-        if(audio.currentTime < 4) audio.currentTime = 4;
+
+    enterButton.addEventListener('click', function() {
+        // 1. Prepare Audio (skip first 4s)
+        audio.currentTime = 4;
+        audio.volume = 0.6;
+        
+        // 2. Play Audio
+        audio.play().then(() => {
+            console.log("Audio started successfully!");
+        }).catch(e => {
+            console.log("Audio failed:", e);
+        });
+
+        // 3. Fade out the start screen
+        startScreen.style.opacity = '0';
+        
+        // 4. Remove it completely after fade
+        setTimeout(() => {
+            startScreen.style.display = 'none';
+        }, 800);
     });
-
-    function unlockAudio() {
-        if (audio.paused) {
-            // Force skip first 4 seconds immediately before playing
-            if(audio.currentTime < 4) {
-                audio.currentTime = 4;
-            }
-            
-            audio.volume = 0.6; 
-            
-            // Try to play
-            var playPromise = audio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    console.log("Audio started!");
-                    // Remove listeners once successful
-                    document.removeEventListener('click', unlockAudio);
-                    document.removeEventListener('touchstart', unlockAudio);
-                    document.removeEventListener('scroll', unlockAudio);
-                    document.removeEventListener('keydown', unlockAudio);
-                    document.removeEventListener('mousemove', unlockAudio);
-                })
-                .catch(error => {
-                    console.log("Auto-play blocked. Waiting for interaction.");
-                });
-            }
-        }
-    }
-
-    // LISTENER ARMY: Triggers on literally any movement
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio); // Phone touch
-    document.addEventListener('scroll', unlockAudio);     // Phone scroll
-    document.addEventListener('keydown', unlockAudio);    // Keyboard press
-    document.addEventListener('mousemove', unlockAudio);  // Mouse movement (PC)
-    
-    // Try once immediately on load
-    unlockAudio();
-
 
     // --- 2. STAR GENERATOR ---
     function createStars() {
@@ -223,8 +222,6 @@
     const moveButton = function (e) {
       if(e && e.type === 'touchstart') e.preventDefault();
       
-      unlockAudio(); // Ensure audio plays
-
       const maxWidth = window.innerWidth - noButton.offsetWidth - 40;
       const maxHeight = window.innerHeight - noButton.offsetHeight - 40;
       
@@ -242,8 +239,6 @@
 
     // --- 4. YES BUTTON LOGIC ---
     yesButton.addEventListener("click", () => {
-      unlockAudio(); // Ensure audio plays
-
       mainContainer.style.display = 'none';
       document.querySelector('p').style.display = 'none';
 

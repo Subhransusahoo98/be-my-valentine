@@ -94,7 +94,7 @@
 </head>
 <body>
   
-  <audio id="bgMusic" loop>
+  <audio id="bgMusic" loop autoplay>
     <source src="https://ia800504.us.archive.org/11/items/HaloThemeSongOriginal/Halo%20Theme%20Song%20Original.mp3" type="audio/mpeg">
   </audio>
 
@@ -136,27 +136,32 @@
   </div>
 
   <script>
-    // --- 1. SETUP AUDIO & MUSIC ---
+    // --- 1. AGGRESSIVE AUDIO UNLOCKER ---
     const audio = document.getElementById("bgMusic");
     
-    // Function to start audio
-    function startMusic() {
-        // Only try to play if it's currently paused
+    function unlockAudio() {
+        // If it's paused, play it
         if (audio.paused) {
-            audio.volume = 0.6; // Set volume
+            audio.volume = 0.6; 
             audio.play().then(() => {
-                console.log("Monks are chanting...");
+                // If successful, we can remove the listeners to save memory
+                document.removeEventListener('click', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+                document.removeEventListener('scroll', unlockAudio);
             }).catch(e => {
-                console.log("Waiting for user interaction to play audio");
+                console.log("Auto-play blocked, waiting for touch...");
             });
         }
     }
 
-    // LISTENER: The moment she touches ANYTHING (screen, buttons, scroll), music starts
-    document.body.addEventListener('click', startMusic, { once: true }); 
-    document.body.addEventListener('touchstart', startMusic, { once: true });
-    // Also try immediately just in case browser allows it (desktop sometimes does)
-    startMusic();
+    // Attach to EVERY interaction type to catch the first movement
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    document.addEventListener('scroll', unlockAudio);
+    document.addEventListener('keydown', unlockAudio);
+    
+    // Try once immediately on load (works on some desktops)
+    unlockAudio();
 
 
     // --- 2. STAR GENERATOR ---
@@ -198,8 +203,8 @@
     const moveButton = function (e) {
       if(e && e.type === 'touchstart') e.preventDefault();
       
-      // Ensure audio plays if she tries to click No first
-      startMusic();
+      // Safety check: ensure music is playing if they try to hit No
+      unlockAudio();
 
       const maxWidth = window.innerWidth - noButton.offsetWidth - 40;
       const maxHeight = window.innerHeight - noButton.offsetHeight - 40;
@@ -218,13 +223,13 @@
 
     // --- 4. YES BUTTON LOGIC ---
     yesButton.addEventListener("click", () => {
-      // Ensure audio is playing
-      startMusic();
+      // Safety check: ensure music is playing
+      unlockAudio();
 
       mainContainer.style.display = 'none';
       document.querySelector('p').style.display = 'none';
 
-      // Play Muted Video
+      // Play Muted Video (Music continues playing from background)
       videoElement.style.display = 'block';
       videoElement.play();
       

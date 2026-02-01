@@ -92,7 +92,7 @@
 <body>
   
   <audio id="bgMusic">
-    <source src="./chanting.mp3" type="audio/mpeg">
+    <source src="https://ia800504.us.archive.org/11/items/HaloThemeSongOriginal/Halo%20Theme%20Song%20Original.mp3" type="audio/mpeg">
   </audio>
 
   <video id="spaceshipVideo">
@@ -187,7 +187,10 @@
       // 2. Play Video & Music
       videoElement.style.display = 'block';
       videoElement.play();
-      audio.play().catch(e => console.log("Audio error: ", e));
+      
+      // Set volume and play music
+      audio.volume = 0.7; 
+      audio.play().catch(e => console.log("Audio play error", e));
       
       // 3. WHEN VIDEO ENDS -> Show Text & Hyperspace
       videoElement.onended = function() {
@@ -238,10 +241,3 @@
         y += dy;
         bounceImage.style.left = x + "px";
         bounceImage.style.top = y + "px";
-        requestAnimationFrame(animateBounce);
-      }
-      animateBounce();
-    }
-  </script>
-</body>
-</html>

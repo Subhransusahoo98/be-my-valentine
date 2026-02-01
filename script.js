@@ -7,24 +7,7 @@ const imageDisplay = document.getElementById('imageDisplay');
 const valentineQuestion = document.getElementById('valentineQuestion');
 const responseButtons = document.getElementById('responseButtons');
 
-let noClickCount = 0;
-let buttonHeight = 48;
-let buttonWidth = 80;
-let fontSize = 20;
-
-// These are the GIFs that show when she clicks No. 
-// Make sure you have image1.gif through image7.gif in your images folder!
-const imagePaths = [
-  './images/image1.gif',
-  './images/image2.gif',
-  './images/image3.gif',
-  './images/image4.gif',
-  './images/image5.gif',
-  './images/image6.gif',
-  './images/image7.gif'
-];
-
-// Sound effect for clicks
+// Sound effect
 function playSound(soundPath) {
   const audio = new Audio(soundPath);
   audio.play();
@@ -34,67 +17,80 @@ const getRandomNumber = (num) => {
   return Math.floor(Math.random() * (num + 1));
 };
 
-// Runaway Button Logic
-const runawayButtonLogic = (button) => {
-  const moveButton = function () {
-    if (this.textContent.trim() === "Say yes, Clara!") {
-      const top = getRandomNumber(window.innerHeight - this.offsetHeight);
-      const left = getRandomNumber(window.innerWidth - this.offsetWidth);
+// --- RUNAWAY LOGIC (INSTANT) ---
+const moveButton = function () {
+  const top = getRandomNumber(window.innerHeight - noButton.offsetHeight);
+  const left = getRandomNumber(window.innerWidth - noButton.offsetWidth);
 
-      animateMove(this, "top", top).play();
-      animateMove(this, "left", left).play();
-    }
-  };
-  button.addEventListener("mouseover", moveButton);
-  button.addEventListener("click", moveButton);
-};
-
-const animateMove = (element, prop, pixels) =>
   anime({
-    targets: element,
-    [prop]: `${pixels}px`,
+    targets: noButton,
+    top: `${top}px`,
+    left: `${left}px`,
     easing: "easeOutCirc",
     duration: 500,
   });
+};
 
-// --- NO BUTTON LOGIC ---
-noButton.addEventListener("click", () => {
-  playSound('./sounds/click.mp3'); // Ensure you have a click.mp3 or remove this line
-  
-  if (noClickCount < 4) {
-    noClickCount++;
-    imageDisplay.src = imagePaths[noClickCount] || "./images/image1.gif";
+// Make it run on Mouse Over (PC) and Click (Mobile)
+noButton.addEventListener("mouseover", moveButton);
+noButton.addEventListener("click", moveButton);
+// Important: Set position to absolute so it can move freely
+noButton.style.position = "absolute"; 
 
-    // Make Yes button grow
-    buttonHeight += 35;
-    buttonWidth += 35;
-    fontSize += 25;
-    yesButton.style.height = `${buttonHeight}px`;
-    yesButton.style.width = `${buttonWidth}px`;
-    yesButton.style.fontSize = `${fontSize}px`;
+// --- YES BUTTON LOGIC ---
+yesButton.addEventListener("click", () => {
+  playSound('./sounds/click.mp3');
+  imageDisplay.remove();
+  responseButtons.style.display = "none";
 
-    // --- CUSTOM MESSAGES FOR CLARA ---
-    const messages = [
-      "No",
-      "Really, Clara?",
-      "Think about the Sushi! 🍣", 
-      "Don't break my heart 💔",
-      "Say yes, Clara!",
-    ];
+  valentineQuestion.innerHTML = `
+    <img src="./images/image7.gif" alt="Celebration" style="display: block; margin: 0 auto; width: 200px; height: auto;"/><br>
+    Yay! I knew it! ❤️<br><br>
+    <span style="font-size: 24px; color: #bd1e59;">Pick you up at 8pm? 🍣🥂</span>
+  `;
+  valentineQuestion.style.textAlign = "center";
 
-    if (noClickCount === 4) {
-      const newButton = document.createElement("button");
-      newButton.id = "runawayButton";
-      newButton.textContent = "Say yes, Clara!"; // The text on the running button
-      newButton.style.position = "absolute";
-      
-      const yesButtonRect = yesButton.getBoundingClientRect();
-      newButton.style.top = `${yesButtonRect.bottom + 10}px`;
-      newButton.style.left = `${yesButtonRect.left + yesButtonRect.width / 2 + 24}px`;
+  // Bouncing Image
+  const bounceImage = document.createElement("img");
+  bounceImage.src = "./images/us.jpg"; 
+  bounceImage.alt = "Us ❤️";
+  bounceImage.style.position = "absolute";
+  bounceImage.style.width = "300px";
+  bounceImage.style.height = "325px";
+  bounceImage.style.borderRadius = "50%";
+  bounceImage.style.border = "5px solid #bd1e59"; 
+  bounceImage.style.objectFit = "cover";
+  document.body.appendChild(bounceImage);
+  startBouncing(bounceImage);
 
-      newButton.style.backgroundColor = "#ff5a5f";
-      newButton.style.color = "white";
-      newButton.style.padding = "12px 20px";
-      newButton.style.borderRadius = "8px";
-      newButton.style.cursor = "pointer";
-      newButton.style.fontSize = "20
+  confetti({
+    particleCount: 150,
+    spread: 90,
+    origin: { x: 0.5, y: 0.7 },
+    colors: ["#FF5A5F", "#3DCC91", "#FFD1DC"],
+  });
+});
+
+function startBouncing(element) {
+  let x = Math.random() * (window.innerWidth - element.offsetWidth);
+  let y = Math.random() * (window.innerHeight - element.offsetHeight);
+  let dx = 2; let dy = 2; let rotation = 0;
+
+  function move() {
+    const viewportWidth = window.innerWidth - element.offsetWidth;
+    const viewportHeight = window.innerHeight - element.offsetHeight;
+
+    if (x <= 0 || x >= viewportWidth) {
+      dx *= -1; rotation += 15;
+      anime({ targets: element, translateX: dx > 0 ? x + 20 : x - 20, duration: 300, easing: "easeOutElastic(1, .6)" });
+    }
+    if (y <= 0 || y >= viewportHeight) {
+      dy *= -1; rotation += 15;
+      anime({ targets: element, translateY: dy > 0 ? y + 20 : y - 20, duration: 300, easing: "easeOutElastic(1, .6)" });
+    }
+    x += dx; y += dy;
+    element.style.left = `${x}px`; element.style.top = `${y}px`; element.style.transform = `rotate(${rotation}deg)`;
+    requestAnimationFrame(move);
+  }
+  move();
+}

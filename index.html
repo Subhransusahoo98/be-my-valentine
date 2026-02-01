@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>For HonigBärchen 🌹</title>
+  <title>For Clara 🌹</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -32,13 +32,14 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: #000; /* Pure black to hide everything */
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(2px);
         z-index: 9999;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transition: opacity 0.8s ease-out; /* Smooth fade out */
+        transition: opacity 0.8s ease-out;
     }
 
     /* Twinkling Star Styles */
@@ -104,6 +105,12 @@
         text-shadow: 0 4px 10px rgba(0,0,0,0.8); 
         padding: 20px;
     }
+    
+    /* Golden Text Class */
+    .honey-text {
+        color: #FFD700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -113,8 +120,8 @@
   </audio>
 
   <div id="startScreen">
-    <button id="enterButton" class="text-2xl font-bold text-pink-500 border-2 border-pink-500 rounded-full px-8 py-4 hover:bg-pink-500 hover:text-white transition shadow-[0_0_15px_rgba(236,72,153,0.6)] heartbeat">
-      For my HonigBärchen 🌹 (Tap to Open)
+    <button id="enterButton" class="text-xl md:text-2xl font-bold text-pink-500 border-2 border-pink-500 rounded-full px-8 py-4 hover:bg-pink-500 hover:text-white transition shadow-[0_0_15px_rgba(236,72,153,0.6)] heartbeat">
+      For Clara 🌹<br><span class="text-sm text-gray-400 font-normal">(Tap to Open)</span>
     </button>
   </div>
 
@@ -123,10 +130,10 @@
   </video>
 
   <div id="mainContainer" class="flex flex-col items-center p-4 text-center z-10 w-full max-w-md">
-    <img id="imageDisplay" src="./images/image1.gif" alt="Cute bear" class="rounded-md h-[250px] md:h-[300px] object-cover mb-4" />
+    <img id="imageDisplay" src="./images/image1.gif" alt="Cute bear" class="rounded-md h-[250px] md:h-[300px] object-cover mb-4 shadow-[0_0_20px_rgba(255,105,180,0.3)]" />
     
     <h2 id="valentineQuestion" class="text-3xl md:text-4xl font-bold italic text-pink-500 mb-2 leading-tight">
-      Will you be my Valentine, my HonigBärchen? 🌹
+      Will you be my Valentine,<br><span class="honey-text">HonigBärchen</span>? 🌹
     </h2>
     
     <p class="text-lg md:text-xl font-semibold text-gray-300 mb-6">
@@ -162,21 +169,17 @@
     const audio = document.getElementById("bgMusic");
 
     enterButton.addEventListener('click', function() {
-        // 1. Prepare Audio (skip first 4s)
+        // Prepare Audio (skip first 4s)
         audio.currentTime = 4;
         audio.volume = 0.6;
         
-        // 2. Play Audio
         audio.play().then(() => {
             console.log("Audio started successfully!");
         }).catch(e => {
             console.log("Audio failed:", e);
         });
 
-        // 3. Fade out the start screen
         startScreen.style.opacity = '0';
-        
-        // 4. Remove it completely after fade
         setTimeout(() => {
             startScreen.style.display = 'none';
         }, 800);
@@ -241,16 +244,13 @@
       mainContainer.style.display = 'none';
       document.querySelector('p').style.display = 'none';
 
-      // Play Muted Video
       videoElement.style.display = 'block';
       videoElement.play();
       
-      // When Video Ends...
       videoElement.onended = function() {
         videoElement.style.opacity = '0';
         videoElement.style.transition = 'opacity 1s';
         
-        // Show Success Page
         successContainer.style.display = 'flex';
         engageHyperdrive();
 
@@ -258,7 +258,7 @@
           particleCount: 150,
           spread: 100,
           origin: { y: 0.6 },
-          colors: ['#ff69b4', '#ffffff', '#00c3ff']
+          colors: ['#ff69b4', '#ffffff', '#00c3ff', '#FFD700']
         });
 
         startBouncingImage();
@@ -268,13 +268,17 @@
     function startBouncingImage() {
       const bounceImage = document.createElement("img");
       bounceImage.src = "./images/us.jpg"; 
-      bounceImage.onerror = function() { this.style.display = 'none'; };
+      
+      // Fallback
+      bounceImage.onerror = function() { 
+          this.src = "./images/image7.gif"; 
+      };
       
       bounceImage.style.position = "fixed"; 
       bounceImage.style.width = "150px"; 
       bounceImage.style.height = "150px";
       bounceImage.style.borderRadius = "50%";
-      bounceImage.style.border = "5px solid #ec4899"; 
+      bounceImage.style.border = "5px solid #FFD700"; 
       bounceImage.style.objectFit = "cover";
       bounceImage.style.zIndex = "0"; 
       document.body.appendChild(bounceImage);
